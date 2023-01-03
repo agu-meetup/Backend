@@ -1,13 +1,22 @@
-// include the token package
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 
-module.exports = (req, res, next) => {
-  try {
-    const token = req.headers.authorization.split(" ")[1];
-    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
-    req.userData = {role: decodedToken.role, id: decodedToken.id};
-    next();
-  } catch (error) {
-    res.status(401).json({ message: "You are not authenticated!" });
-  }
-};
+const verifyToken = async(req, res, next) => {
+    console.log(req.headers.authorization);
+    
+    if(!req.headers.authorization) return res.status(403).json({msg: 'Not authorized. No token'})
+
+    if(req.headers.authorization && req.headers.authorization.startsWith("Bearer ")){
+      const token = req.headers.authorization.split(' ')[1]
+      jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
+        if(err) return res.status(403).json({msg: 'Wrong or expired token.'})
+        else {
+            req.user = data // an object with only the user id as its property
+            next()
+        }
+      })
+    } else {
+        return res.status(403).json({msg: 'Not authorized. No token'})
+    }
+}
+
+module.exports = verifyToken
