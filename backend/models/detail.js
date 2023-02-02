@@ -20,7 +20,12 @@ const Detail = sequelize.define("details", {
     title: {
         type: Sequelize.STRING,
         allowNull: false,
-    }
+    },
+    category: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    
 });
 
 module.exports = Detail;
