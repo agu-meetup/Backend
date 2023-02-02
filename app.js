@@ -6,6 +6,7 @@ const path = require("path");
 
 // including routehandlers
 const authRouter = require("./backend/routes/auth_router");
+const eventRouter = require("./backend/routes/event_router");
 
 // including middlewares
 
@@ -34,6 +35,7 @@ app.use((req, res, next) => {
   });
 
   app.use("/api/auth", authRouter);
+  app.use("/api", eventRouter);
 
   // exporting the express server, so we can use it in server.js
 module.exports = app;
