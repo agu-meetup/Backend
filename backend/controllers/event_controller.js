@@ -71,7 +71,7 @@ exports.getEvent = (req, res, next) => {
                 }
             });
         })
-        
+
         .catch(err => {
             if (!err.statusCode) {
                 err.statusCode = 500;
@@ -92,6 +92,7 @@ exports.createEvent = (req, res, next) => {
     const name = req.body.name ?? "";
     const description = req.body.description ?? "";
     const title = req.body.title ?? "";
+    const category = req.body.category ?? "";
 
     let createdLocation;
     let createdDetail;
@@ -108,7 +109,7 @@ exports.createEvent = (req, res, next) => {
                 name: name,
                 description: description,
                 title: title,
-                category: "event"
+                category: category
             })
         }
         )
@@ -261,20 +262,34 @@ exports.getEventsByGroup = (req, res, next) => {
 }
 
 exports.getEventsByLocation = (req, res, next) => {
-    const locationId = req.params.locationId;
-    Event.findAll({ where: { location_id: locationId } })
-        .then(events => {
-            res.status(200).json({
-                message: 'Fetched events by location successfully.',
-                events: events
-            });
-        })
-        .catch(err => {
-            if (!err.statusCode) {
-                err.statusCode = 500;
+    const lattiude = req.params.lattiude;
+    const longitude = req.params.longitude;
+    Event.findAll({
+        include: [
+            {
+                model: Location,
+                where: {
+                    lattiude: lattiude,
+                    longitude: longitude
+
+                }
             }
-            next(err);
+        ]
+    }).then(events => {
+        res.status(200).json({
+            message: 'Fetched events by location successfully.',
+            events: events
         });
+    }
+    ).catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+    );
+
+
 }
 
 exports.getEventsByParameter = (req, res, next) => {
@@ -294,6 +309,63 @@ exports.getEventsByParameter = (req, res, next) => {
     }).then(events => {
         res.status(200).json({
             message: 'Fetched events by detail successfully.',
+            events: events
+        });
+    }
+    ).catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+    );
+
+}
+exports.getEventsByCategory = async (req, res, next) => {
+    const category = req.params.category;
+    Event.findAll({
+        include: {
+            model: Detail,
+            where: {
+                category: category
+            }
+        }
+
+    }).then(events => {
+        res.status(200).json({
+            message: 'Fetched events by category successfully.',
+            events: events
+        });
+    }
+    ).catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+    );
+
+}
+
+
+
+exports.getEventsByCategories = (req, res, next) => {
+    const categories = req.params.categories.split(",");
+
+    Event.findAll({
+        include: [
+            {
+                model: Detail,
+                where: {
+                    category: {
+                        [Op.or]: categories
+                    }
+                }
+            }
+        ]
+    }).then(events => {
+        res.status(200).json({
+            message: 'Fetched events by categories successfully.',
             events: events
         });
     }
@@ -405,6 +477,7 @@ exports.updateDetails = (req, res, next) => {
     const title = req.body.title;
     const name = req.body.name;
     const description = req.body.description;
+    const category = req.body.category;
     Event.findByPk(eventId)
         .then(event => {
             if (!event) {
@@ -419,6 +492,7 @@ exports.updateDetails = (req, res, next) => {
             detail.title = title;
             detail.name = name;
             detail.description = description;
+            detail.category = category;
             return detail.save();
         }
         )
@@ -450,9 +524,9 @@ exports.deleteEvent = (req, res, next) => {
             detailId = event.detail_id;
             locationId = event.location_id;
             groupId = event.group_id;
-             Detail.destroy({ where: { id: detailId } });
-             Location.destroy({ where: { id: locationId } });
-             Group.destroy({ where: { id: groupId } })
+            Detail.destroy({ where: { id: detailId } });
+            Location.destroy({ where: { id: locationId } });
+            Group.destroy({ where: { id: groupId } })
             return event.destroy();
         }
         )

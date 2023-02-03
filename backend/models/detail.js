@@ -2,6 +2,7 @@
 // Table name: detail
 const Sequelize=require('sequelize');
 const sequelize = require('../util/database');
+
 const Detail = sequelize.define("details", {
     id: {
         primaryKey: true,
@@ -27,5 +28,6 @@ const Detail = sequelize.define("details", {
     },
     
 });
+
 
 module.exports = Detail;

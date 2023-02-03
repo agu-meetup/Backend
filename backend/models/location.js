@@ -3,6 +3,7 @@
 
 const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
+const User = require('./user');
 const Location = sequelize.define("locations", {
     id: {
         primaryKey: true,
@@ -23,10 +24,13 @@ const Location = sequelize.define("locations", {
         allowNull: true,
         foreignKey: true,
         references: {
-            model: 'users',
+            model: User,
             key: 'id'
         }
     }
 });
+
+User.hasMany(Location);
+Location.belongsTo(User);    
 
 module.exports = Location;

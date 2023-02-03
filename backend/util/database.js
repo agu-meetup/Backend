@@ -5,7 +5,7 @@ const Sequelize=require('sequelize');
 const connection=mysql.createConnection({
     host:"localhost",
     user:"root",
-    password: ""
+    password: "muhammed12q"
 });
 
 connection.query(`CREATE DATABASE IF NOT EXISTs agu_meetUp`,function(err,result){
@@ -16,7 +16,8 @@ connection.end();
 
 const sequelize=new Sequelize('agu_meetUp','root','',
 {dialect:'mysql',
-host:'localhost'
+host:'localhost',
+password:'muhammed12q'
 });
 
 module.exports=sequelize;
