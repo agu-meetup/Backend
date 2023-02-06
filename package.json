@@ -25,6 +25,7 @@
     "iyzipay": "^2.0.26",
     "jsonwebtoken": "^9.0.0",
     "mysql2": "^2.3.3",
+    "nodemailer": "^6.9.1",
     "nodemon": "^2.0.20",
     "sequelize": "^6.25.5"
   }
