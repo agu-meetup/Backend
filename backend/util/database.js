@@ -17,7 +17,8 @@ connection.end();
 const sequelize=new Sequelize('agu_meetUp','root','',
 {dialect:'mysql',
 host:'localhost',
-password:'muhammed12q'
+password:'muhammed12q',
+timezone : '+03:00',
 });
 
 module.exports=sequelize;

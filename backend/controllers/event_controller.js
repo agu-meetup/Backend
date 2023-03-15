@@ -5,6 +5,8 @@ const Detail = require('../models/detail');
 const User = require('../models/user');
 const Group = require('../models/group');
 const Location = require('../models/location');
+const User_Event = require('../models/user_event');
+
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
@@ -83,20 +85,37 @@ exports.getEvent = (req, res, next) => {
 exports.createEvent = (req, res, next) => {
     const date = new Date();
     const creating_time = date.getDate();
-    const start_time = req.body.start_time ?? creating_time;
-    const end_time = req.body.end_time ?? creating_time;
-    const users = req.body.users ?? ""
-    const lattiude = req.body.lattiude ?? 0;
-    const longitude = req.body.longitude ?? 0;
+    const start_time = req.body.start_time;
+    const end_time = req.body.end_time;
+    const users = req.body.users;
+    const lattiude = req.body.lattiude;
+    const longitude = req.body.longitude;
     const user_id = req.body.user_id;
-    const name = req.body.name ?? "";
-    const description = req.body.description ?? "";
-    const title = req.body.title ?? "";
-    const category = req.body.category ?? "";
+    const name = req.body.name;
+    const description = req.body.description;
+    const title = req.body.title;
+    const category = req.body.category;
+    const max_participants = req.body.max_participants;
+    const hosts = req.body.hosts;
+    const gender =req.body.gender;
+    const imageUrl=req.body.imageUrl;
+    const price = req.body.price;
 
     let createdLocation;
     let createdDetail;
     let createdGroup;
+
+    // null check
+    if (!start_time || !end_time || !users || !lattiude || !longitude || !user_id || !name || !description || !title || !category) {
+        const error = new Error('Missing fields');
+        error.statusCode = 422;
+        res.status(422).json({
+            message: 'Missing fields'
+        });
+
+    }
+
+
 
     Location.create({
         lattiude: lattiude,
@@ -129,7 +148,12 @@ exports.createEvent = (req, res, next) => {
                 location_id: createdLocation.id,
                 detail_id: createdDetail.id,
                 group_id: createdGroup.id,
-                user_id: user_id
+                user_id: user_id,
+                max_participants: max_participants,
+                hosts: hosts,
+                gender:gender,
+                imageUrl:imageUrl,
+                price:price
 
             })
         }
@@ -161,24 +185,49 @@ exports.updateEvent = (req, res, next) => {
     const name = req.body.name;
     const description = req.body.description;
     const title = req.body.title;
+    const category = req.body.category;
+    const gender =req.body.gender;
+    const hosts = req.body.hosts;
+    const imageUrl=req.body.imageUrl;
+    const price = req.body.price;
 
     const eventId = req.params.eventId;
     let eventLocation;
     let eventDetail;
     let eventGroup;
 
+    // null check
+    if (!start_time || !end_time || !users || !lattiude || !longitude || !name || !description || !title) {
+        const error = new Error('Missing fields');
+        error.statusCode = 422;
+        res.status(422).json({
+            message: 'Missing fields'
+        });
+        throw error;
+    }
+
     Event.findByPk(eventId)
         .then(event => {
             if (!event) {
                 const error = new Error('Could not find event.');
                 error.statusCode = 404;
+                res.status(404).json({
+
+                    message: 'Could not find event.'
+                });
                 throw error;
             }
             eventLocation = event.location_id;
             eventDetail = event.detail_id;
             eventGroup = event.group_id;
-            event.start_time = start_time;
-            event.end_time = end_time;
+            
+            event.start_time = start_time ?? event.start_time;
+            event.end_time = end_time ?? event.end_time;
+            event.max_participants = max_participants ?? event.max_participants;
+            event.hosts = hosts ?? event.hosts;
+            event.gender = gender?? event.gender;
+            event.imageUrl = imageUrl?? event.imageUrl;
+            event.price = price?? event.price;
             return event.save();
         }
         )
@@ -187,8 +236,8 @@ exports.updateEvent = (req, res, next) => {
         }
         )
         .then(location => {
-            location.lattiude = lattiude;
-            location.longitude = longitude;
+            location.lattiude = lattiude ?? location.lattiude;
+            location.longitude = longitude ?? location.longitude;
             return location.save();
         }
         )
@@ -197,9 +246,10 @@ exports.updateEvent = (req, res, next) => {
         }
         )
         .then(detail => {
-            detail.name = name;
-            detail.description = description;
-            detail.title = title;
+            detail.name = name ?? detail.name;
+            detail.description = description ?? detail.description;
+            detail.title = title ?? detail.title;
+            detail.category = category ?? detail.category;
             return detail.save();
         }
         )
@@ -208,7 +258,7 @@ exports.updateEvent = (req, res, next) => {
         }
         )
         .then(group => {
-            group.users = users;
+            group.users = users ?? group.users;
             return group.save();
         }
         )
@@ -229,6 +279,15 @@ exports.updateEvent = (req, res, next) => {
 
 exports.getEventsByUser = (req, res, next) => {
     const userId = req.params.userId;
+
+    // null check
+    if (!userId) {
+        const error = new Error('User id is null');
+        error.statusCode = 404;
+        throw error;
+    }
+
+
     Event.findAll({ where: { user_id: userId } })
         .then(events => {
             res.status(200).json({
@@ -246,6 +305,15 @@ exports.getEventsByUser = (req, res, next) => {
 
 exports.getEventsByGroup = (req, res, next) => {
     const groupId = req.params.groupId;
+
+    // null check
+    if (!groupId) {
+        const error = new Error('Group id is null');
+        error.statusCode = 404;
+        throw error;
+    }
+
+
     Event.findAll({ where: { group_id: groupId } })
         .then(events => {
             res.status(200).json({
@@ -264,6 +332,15 @@ exports.getEventsByGroup = (req, res, next) => {
 exports.getEventsByLocation = (req, res, next) => {
     const lattiude = req.params.lattiude;
     const longitude = req.params.longitude;
+
+    // null check
+    if (!lattiude || !longitude) {
+        const error = new Error('Lattiude or longitude are null');
+        error.statusCode = 404;
+        throw error;
+    }
+
+
     Event.findAll({
         include: [
             {
@@ -294,6 +371,14 @@ exports.getEventsByLocation = (req, res, next) => {
 
 exports.getEventsByParameter = (req, res, next) => {
     const parameter = req.params.parameter;
+
+    //null check
+    if (!parameter) {
+        const error = new Error('Parameter is null');
+        error.statusCode = 404;
+        throw error;
+    }
+
     Event.findAll({
         include: [
             {
@@ -323,6 +408,15 @@ exports.getEventsByParameter = (req, res, next) => {
 }
 exports.getEventsByCategory = async (req, res, next) => {
     const category = req.params.category;
+
+    //null check
+    if (!category) {
+        const error = new Error('Could not find category.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+
     Event.findAll({
         include: {
             model: Detail,
@@ -350,7 +444,14 @@ exports.getEventsByCategory = async (req, res, next) => {
 
 
 exports.getEventsByCategories = (req, res, next) => {
-    const categories = req.params.categories.split(",");
+    const categories = req.params.categories.split("-");
+
+    if (!categories) {
+        const error = new Error('Could not find categories.');
+        error.statusCode = 404;
+        throw error;
+    }
+
 
     Event.findAll({
         include: [
@@ -382,6 +483,21 @@ exports.getEventsByCategories = (req, res, next) => {
 exports.updateUsers = (req, res, next) => {
     const eventId = req.params.eventId;
     const users = req.body.users;
+
+    // null check
+    if (!eventId) {
+        const error = new Error('Event id is null.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (!users) {
+        const error = new Error('Users are null.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+
     Event.findByPk(eventId)
         .then(event => {
             if (!event) {
@@ -393,7 +509,7 @@ exports.updateUsers = (req, res, next) => {
         }
         )
         .then(group => {
-            group.users = users;
+            group.users = users ?? group.users;
             return group.save();
         }
         )
@@ -414,6 +530,23 @@ exports.updateTime = (req, res, next) => {
     const eventId = req.params.eventId;
     const start_time = req.body.start_time;
     const end_time = req.body.end_time;
+
+    // null check
+
+    if (!eventId) {
+        const error = new Error('Event id is null.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (!start_time && !end_time) {
+        const error = new Error('Start time and end time are null.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+
+
     Event.findByPk(eventId)
         .then(event => {
             if (!event) {
@@ -421,8 +554,8 @@ exports.updateTime = (req, res, next) => {
                 error.statusCode = 404;
                 throw error;
             }
-            event.start_time = start_time;
-            event.end_time = end_time;
+            event.start_time = start_time ?? event.start_time;
+            event.end_time = end_time ?? event.end_time;
             return event.save();
         }
         )
@@ -443,6 +576,21 @@ exports.updateLocation = (req, res, next) => {
     const eventId = req.params.eventId;
     const lattiude = req.body.lattiude;
     const longitude = req.body.longitude;
+
+    if (!eventId) {
+        const error = new Error('Could not find event.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (!lattiude && !longitude) {
+        const error = new Error('Could not find location.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+
+
     Event.findByPk(eventId)
         .then(event => {
             if (!event) {
@@ -454,8 +602,8 @@ exports.updateLocation = (req, res, next) => {
         }
         )
         .then(location => {
-            location.lattiude = lattiude;
-            location.longitude = longitude;
+            location.lattiude = lattiude ?? location.lattiude;
+            location.longitude = longitude ?? location.longitude;
             return location.save();
         }
         )
@@ -478,6 +626,15 @@ exports.updateDetails = (req, res, next) => {
     const name = req.body.name;
     const description = req.body.description;
     const category = req.body.category;
+
+    //null check
+
+    if (!title && !name && !description && !category) {
+        const error = new Error('No details to update');
+        error.statusCode = 404;
+        return next(error);
+    }
+
     Event.findByPk(eventId)
         .then(event => {
             if (!event) {
@@ -489,10 +646,10 @@ exports.updateDetails = (req, res, next) => {
         }
         )
         .then(detail => {
-            detail.title = title;
-            detail.name = name;
-            detail.description = description;
-            detail.category = category;
+            detail.title = title ?? detail.title;
+            detail.name = name ?? detail.name;
+            detail.description = description ?? detail.description;
+            detail.category = category ?? detail.category;
             return detail.save();
         }
         )
@@ -514,6 +671,23 @@ exports.deleteEvent = (req, res, next) => {
     let detailId;
     let locationId;
     let groupId;
+
+    //null check
+
+    if (!eventId) {
+        const error = new Error('No event to delete');
+        error.statusCode = 404;
+        return next(error);
+
+    }
+
+    if (!detailId && !locationId && !groupId) {
+        const error = new Error('No event to delete');
+        error.statusCode = 404;
+        return next(error);
+    }
+
+
     Event.findByPk(eventId)
         .then(async event => {
             if (!event) {
@@ -531,7 +705,7 @@ exports.deleteEvent = (req, res, next) => {
         }
         )
         .then(result => {
-            res.status(200).json({ message: 'Deleted event.' });
+            res.status(200).json({ message: 'Deleted event.', result: result });
         }
         )
         .catch(err => {
@@ -541,5 +715,88 @@ exports.deleteEvent = (req, res, next) => {
             next(err);
         }
         );
+
+}
+
+exports.joinEvent = (req, res, next) => {
+    const eventId = req.params.eventId;
+    const userId = req.body.userId;
+
+    if (!eventId) {
+        const error = new Error('Could not find event.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (!userId) {
+        const error = new Error('Could not find user.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    
+    Event.findByPk(eventId)
+        .then(event => {
+            if (!event) {
+                const error = new Error('Could not find event.');
+                error.statusCode = 404;
+                throw error;
+            }
+            return Group.findByPk(event.group_id);
+        }
+        )
+        .then(group => {
+            if(group.users.length >0)
+            {
+                group.users=group.users.concat("-"+userId);
+            }
+            else
+            {
+                group.users=userId;
+            }
+            return group.save();
+        }
+        )
+        .then(result => {
+            res.status(200).json({ message: 'User joined event!', event: result });
+        }
+        ).then(result => {
+            User_Event.create({
+                user_id: userId,
+                event_id: eventId
+            })
+        }
+        )
+        .catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        }
+        );
+        
+}
+
+exports.getUserEventsByUserId = (req, res, next) => {
+    const userId = req.params.userId;
+
+    if (!userId) {
+        const error = new Error('Could not find user.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    User_Event.findAll({ where: { user_id: userId } })
+        .then(result => {
+            res.status(200).json({ message: 'Fetched events.', events: result });
+        }
+        ).catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        }
+        );
+
 
 }

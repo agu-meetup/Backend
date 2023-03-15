@@ -62,7 +62,34 @@ const Event = sequelize.define("events", {
             model: Location,
             key: 'id'
         }
+    },
+    current_participants: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+    },
+    max_participants: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+    },
+    hosts:{
+        type: Sequelize.STRING,
+        allowNull: false,
+
+    },
+    gender:{
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    imageUrl : {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    price : {
+        type: Sequelize.INTEGER,
+        allowNull: true,
     }
+
 });
 
 Detail.hasMany(Event, {foreignKey: 'detail_id'});

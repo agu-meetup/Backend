@@ -30,7 +30,4 @@ const Location = sequelize.define("locations", {
     }
 });
 
-User.hasMany(Location);
-Location.belongsTo(User);    
-
 module.exports = Location;
