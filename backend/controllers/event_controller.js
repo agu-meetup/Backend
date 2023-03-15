@@ -8,6 +8,7 @@ const Location = require('../models/location');
 const User_Event = require('../models/user_event');
 
 const Sequelize = require('sequelize');
+const Address = require('../models/address');
 const Op = Sequelize.Op;
 
 exports.getEvents = (req, res, next) => {
@@ -97,10 +98,10 @@ exports.createEvent = (req, res, next) => {
     const category = req.body.category;
     const max_participants = req.body.max_participants;
     const hosts = req.body.hosts;
-    const gender =req.body.gender;
-    const imageUrl=req.body.imageUrl;
+    const gender = req.body.gender;
+    const imageUrl = req.body.imageUrl;
     const price = req.body.price;
-
+    
     let createdLocation;
     let createdDetail;
     let createdGroup;
@@ -151,9 +152,9 @@ exports.createEvent = (req, res, next) => {
                 user_id: user_id,
                 max_participants: max_participants,
                 hosts: hosts,
-                gender:gender,
-                imageUrl:imageUrl,
-                price:price
+                gender: gender,
+                imageUrl: imageUrl,
+                price: price
 
             })
         }
@@ -186,9 +187,9 @@ exports.updateEvent = (req, res, next) => {
     const description = req.body.description;
     const title = req.body.title;
     const category = req.body.category;
-    const gender =req.body.gender;
+    const gender = req.body.gender;
     const hosts = req.body.hosts;
-    const imageUrl=req.body.imageUrl;
+    const imageUrl = req.body.imageUrl;
     const price = req.body.price;
 
     const eventId = req.params.eventId;
@@ -220,14 +221,14 @@ exports.updateEvent = (req, res, next) => {
             eventLocation = event.location_id;
             eventDetail = event.detail_id;
             eventGroup = event.group_id;
-            
+
             event.start_time = start_time ?? event.start_time;
             event.end_time = end_time ?? event.end_time;
             event.max_participants = max_participants ?? event.max_participants;
             event.hosts = hosts ?? event.hosts;
-            event.gender = gender?? event.gender;
-            event.imageUrl = imageUrl?? event.imageUrl;
-            event.price = price?? event.price;
+            event.gender = gender ?? event.gender;
+            event.imageUrl = imageUrl ?? event.imageUrl;
+            event.price = price ?? event.price;
             return event.save();
         }
         )
@@ -704,6 +705,15 @@ exports.deleteEvent = (req, res, next) => {
             return event.destroy();
         }
         )
+        .then (result => {
+            Address.findAll({ where: { event_id:eventId } })
+                .then(addresses => {
+                    addresses.forEach(address => {
+                        address.destroy();
+                    })
+                })
+        }
+        )
         .then(result => {
             res.status(200).json({ message: 'Deleted event.', result: result });
         }
@@ -734,7 +744,7 @@ exports.joinEvent = (req, res, next) => {
         throw error;
     }
 
-    
+
     Event.findByPk(eventId)
         .then(event => {
             if (!event) {
@@ -746,13 +756,11 @@ exports.joinEvent = (req, res, next) => {
         }
         )
         .then(group => {
-            if(group.users.length >0)
-            {
-                group.users=group.users.concat("-"+userId);
+            if (group.users.length > 0) {
+                group.users = group.users.concat("-" + userId);
             }
-            else
-            {
-                group.users=userId;
+            else {
+                group.users = userId;
             }
             return group.save();
         }
@@ -774,7 +782,7 @@ exports.joinEvent = (req, res, next) => {
             next(err);
         }
         );
-        
+
 }
 
 exports.getUserEventsByUserId = (req, res, next) => {

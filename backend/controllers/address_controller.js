@@ -7,12 +7,15 @@ exports.createAddress = (req, res, next) => {
     const state = req.body.state;
     const street = req.body.street;
     const postcode = req.body.postcode;
+    const event_id = req.body.event_id;
+
     Address.create({
         country: country,
         city:city,
         state: state,
         street: street,
-        postcode: postcode
+        postcode: postcode,
+        event_id: event_id
     })
         .then(result => {
             res.status(201).json({
@@ -78,3 +81,5 @@ exports.updateAddress = (req, res, next) => {
       console.log(error);
     }
   }
+
+  

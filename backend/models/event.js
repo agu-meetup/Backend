@@ -101,7 +101,6 @@ Event.belongsTo(Group, {foreignKey: 'group_id'});
 Location.hasMany(Event, {foreignKey: 'location_id'});
 Event.belongsTo(Location, {foreignKey: 'location_id'});
 
-
 module.exports = Event;
 
 

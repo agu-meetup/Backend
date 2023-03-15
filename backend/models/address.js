@@ -1,6 +1,7 @@
 
 const Sequelize=require('sequelize');
 const sequelize = require('../util/database');
+const Event = require('./event');
 const Address = sequelize.define("address", {
     id: {
         primaryKey: true,
@@ -28,7 +29,18 @@ const Address = sequelize.define("address", {
         type: Sequelize.STRING,
         allowNull: true,
     },
+    event_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        foreignKey: true,
+        references: {
+            model: Event,
+            key: 'id'
+        }
+    }
     
 });
 
 module.exports = Address;
+
+Address.hasOne(Event, {foreignKey: 'event_id'});
