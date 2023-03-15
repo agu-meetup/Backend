@@ -29,6 +29,11 @@ const User = sequelize.define("users",
         type: Sequelize.STRING,
         allowNull: false,
       },
+     
+      gender: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       created_date: {
         type: Sequelize.DATE,
       },
