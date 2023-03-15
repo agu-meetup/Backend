@@ -1,96 +1,103 @@
-
 const bcrypt = require('bcryptjs');
-const nodemailer =require('nodemailer');
+const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
+const ForgotPasswordModel = require('../models/forgot_password');
 const User = require('../models/user');
 
-exports.forgotPassword = (req, res) => {
-  const { email } = req.body;
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'dumanaga1261@gmail.com',
+    pass: 'rrhpvtjcsdjvkpjp'
+  }
+});
 
-  User.findOne({ where: { email: email } }).then(user => {
-    if (!user) {
-      return res.status(400).json({ message: 'Email does not exist' });
-    }
-
-    const token = crypto.randomBytes(20).toString('hex');
-
-    User.update(
-      {
-        resetPasswordToken: token,
-        resetPasswordExpires: Date.now() + 3600000
-      },
-      { where: { email: email } }
-    )
-      .then(() => {
-        // send an email with the password reset link
-        const transporter = nodemailer.createTransport({
-          service: 'gmail',
-          auth: {
-            user: "dumanaga1261@gmail.com",
-            pass: "rrhpvtjcsdjvkpjp"
-          }
-        });
-        
-
-        const mailOptions = {
-          from: 'dumanaga1261@gmail.com',
-          to: email,
-          subject: 'Password reset link',
-          text:
-            'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-            'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-            'http://' +
-            req.headers.host +
-            '/api/password/user/reset/' +
-            token +
-            '\n\n' +
-            'If you did not request this, please ignore this email and your password will remain unchanged.\n'
-        };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-          if (error) {
-            return res.status(500).json({ message: 'Error sending email' });
-          }
-
-          return res
-            .status(200)
-            .json({ message: 'An email has been sent to ' + email + ' with further instructions' });
-        });
-      })
-      .catch(error => {
-        return res.status(500).json({ error });
-      });
-  });
+const generateCode = () => {
+  const code = Math.floor(1000 + Math.random() * 9000);
+  return code.toString();
 };
 
-exports.resetPassword = (req, res) => {
-  const { password, token } = req.body;
+const sendCodeEmail = async (email, code) => {
+  const mailOptions = {
+    from: 'dumanaga1261@gmail.com',
+    to: email,
+    subject: 'Password Recovery',
+    text: `Your password recovery code is ${code}.`
+  };
 
-  User.findOne({ where: { resetPasswordToken: token } }).then(user => {
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Code sent to ${email}`);
+  } catch (error) {
+    console.error(`Error sending code email: ${error.message}`);
+  }
+};
+
+const sendNewPasswordEmail = async (email, newPassword) => {
+  const mailOptions = {
+    from: 'your_email@gmail.com',
+    to: email,
+    subject: 'New Password',
+    text: `Your new password is ${newPassword}. Please login and change your password immediately.`
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`New password sent to ${email}`);
+  } catch (error) {
+    console.error(`Error sending new password email: ${error.message}`);
+  }
+};
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // Check if user exists
+    const user = await User.findOne({ where: { email } });
     if (!user) {
-      return res.status(400).json({ message: 'Token is invalid or has expired' });
+      return res.status(400).json({ message: 'User not found' });
     }
 
-    if (user.resetPasswordExpires < Date.now()) {
-      return res.status(400).json({ message: 'Token has expired' });
+    // Generate and save recovery code
+    const code = generateCode();
+    await user.update({ recoveryCode: code });
+
+    // Send email with recovery code
+    await sendCodeEmail(email, code);
+
+    // Return success response
+    return res.status(200).json({ message: 'Recovery code sent successfully' });
+  } catch (error) {
+    console.error(`Error sending recovery code: ${error.message}`);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { email, code, newPassword } = req.body;
+
+  try {
+    // Check if user exists and code matches
+    const user = await ForgotPasswordModel.findOne({ where: { email, recoveryCode: code } });
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid recovery code' });
     }
 
-    const hash = bcrypt.hashSync(password, 10);
+    // Update user password with new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await user.update({ password: hashedPassword, recoveryCode: null });
 
-    User.update(
-      {
-        password: hash,
-        resetPasswordToken: null,
-        resetPasswordExpires: null
-      },
-      { where: { resetPasswordToken:token } }
-      )
-      .then(() => {
-      return res.status(200).json({ message: 'Password reset successful' });
-      })
-      .catch(error => {
-      return res.status(500).json({ error });
-      });
-      });
-      };
+    // Send email with new password
+    await sendNewPasswordEmail(email, newPassword);
+
+    // Return success response
+    return res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    console.error(`Error resetting password: ${error.message}`);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+module.exports = { forgotPassword, resetPassword };

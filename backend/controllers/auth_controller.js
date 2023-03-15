@@ -16,7 +16,7 @@ exports.userSignup=async (req,res,next)=>{
         const _password=req.body._password;
         const gender =req.body.gender;
         const hashedPassword=await bcrypt.hash(_password,10);
-
+        const forget_password_id= req.body.forget_password_id;
         const emailCheck=await User.findOne({where:{email:email}});
 
        if(emailCheck ){
@@ -31,7 +31,8 @@ exports.userSignup=async (req,res,next)=>{
             email:email,
             phone_number:phone_number,
             _password:hashedPassword,
-            gender:gender
+            gender:gender,
+            forget_password_id:forget_password_id,
             
         }).then((result) => {
             res.status(201).json({

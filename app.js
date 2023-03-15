@@ -9,6 +9,7 @@ const detailRouter = require("./backend/routes/detail_router");
 const groupRouter = require("./backend/routes/group_router");
 const passwordRouter = require("./backend/routes/password_router");
 const addressRouter =require("./backend/routes/address_router");
+const userRouter= require("./backend/routes/user_router")
 // including middlewares
 // including utils
 
@@ -40,6 +41,7 @@ app.use("/api", detailRouter);
 app.use("/api", groupRouter);
 app.use("/api/password", passwordRouter);
 app.use("/api/address",addressRouter);
+app.use("/api",userRouter);
 
 // exporting the express server, so we can use it in server.js
 module.exports = app;
