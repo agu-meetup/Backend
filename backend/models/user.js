@@ -51,7 +51,7 @@ const User = sequelize.define("users", {
   deleted_date: {
     type: Sequelize.DATE,
   },
-}, { timestamps: false, createdAt: false, updatedAt: false, deletedAt: false });
+}, { timestamps: false, createdAt: true, updatedAt: false, deletedAt: false });
 
 
 User.hasMany(ForgotPassword,{foreignKey: 'forgot_password_id'});
