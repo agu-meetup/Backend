@@ -78,7 +78,7 @@ exports.userLogin=async (req, res) => {
                     
                     
                 },config.secret,{
-                    expiresIn:86400
+                    expiresIn:2592000
                 });
                 res.send({
                     "status" : "success",
