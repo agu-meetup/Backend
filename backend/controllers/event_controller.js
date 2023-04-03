@@ -9,6 +9,7 @@ const User_Event = require('../models/user_event');
 
 const Sequelize = require('sequelize');
 const Address = require('../models/address');
+const Saved_Events = require('../models/savedEvents');
 const Op = Sequelize.Op;
 
 exports.getEvents = (req, res, next) => {
@@ -667,6 +668,47 @@ exports.updateDetails = (req, res, next) => {
         );
 }
 
+exports.updateImgUrl =  (req, res, next) => {
+    const eventId = req.params.eventId;
+    const imgUrl = req.body.imgUrl;
+    
+    //null check
+
+    if (!imgUrl) {
+        const error = new Error('No image to update');
+        error.statusCode = 404;
+        return next(error);
+    }
+
+    Event.findByPk(eventId)
+        .then(event => {
+            if (!event) {
+                const error = new Error('Could not find event.');
+                error.statusCode = 404;
+                throw error;
+            }
+            return Detail.findByPk(event.detail_id);
+        }
+        )
+        .then(detail => {
+            detail.imgUrl = imgUrl ?? detail.imgUrl;
+            return detail.save();
+        }
+        )
+        .then(result => {
+            res.status(200).json({ message: 'Image updated!', event: result });
+        }
+        )
+        .catch(err => {
+            if (!err.statusCode) {  
+                err.statusCode = 500;
+            }
+            next(err);
+        }
+        );
+}
+
+
 exports.deleteEvent = (req, res, next) => {
     const eventId = req.params.eventId;
     let detailId;
@@ -806,5 +848,91 @@ exports.getUserEventsByUserId = (req, res, next) => {
         }
         );
 
+
+}
+
+exports.saveEventByUserId = (req, res, next) => {
+    const userId = req.params.userId;
+    const eventId = req.body.eventId;
+
+    if (!userId) {
+        const error = new Error('Could not find user.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (!eventId) {
+        const error = new Error('Could not find event.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    Saved_Events.create({
+        user_id: userId,
+        event_id: eventId
+    })
+        .then(result => {
+            res.status(200).json({ message: 'Event saved!', event: result });
+        }
+        ).catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        }
+        );
+
+}
+
+exports.getSavedEventsByUserId = (req, res, next) => {
+    const userId = req.params.userId;
+
+    if (!userId) {
+        const error = new Error('Could not find user.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    Saved_Events.findAll({ where: { user_id: userId } })
+        .then(result => {
+            res.status(200).json({ message: 'Fetched events.', events: result });
+        }
+        ).catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        }
+        );
+
+}
+
+exports.deleteSavedEventByUserId = (req, res, next) => {
+    const userId = req.params.userId;
+    const eventId = req.body.eventId;
+
+    if (!userId) {
+        const error = new Error('Could not find user.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (!eventId) {
+        const error = new Error('Could not find event.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    Saved_Events.destroy({ where: { user_id: userId, event_id: eventId } })
+        .then(result => {
+            res.status(200).json({ message: 'Event deleted!', event: result });
+        }
+        ).catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        }
+        );
 
 }
