@@ -786,6 +786,13 @@ exports.joinEvent = (req, res, next) => {
                 error.statusCode = 404;
                 throw error;
             }
+            if (event.current_participants == event.max_participants){
+                const error = new Error('The event is full.');
+                error.statusCode = 400;
+                throw error;
+            }
+            event.current_participants++;
+            event.save();
             return Group.findByPk(event.group_id);
         }
         )
