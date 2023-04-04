@@ -687,12 +687,8 @@ exports.updateImgUrl =  (req, res, next) => {
                 error.statusCode = 404;
                 throw error;
             }
-            return Detail.findByPk(event.detail_id);
-        }
-        )
-        .then(detail => {
-            detail.imgUrl = imgUrl ?? detail.imgUrl;
-            return detail.save();
+            event.imageUrl = imgUrl ?? event.imageUrl;
+            return event.save();
         }
         )
         .then(result => {
