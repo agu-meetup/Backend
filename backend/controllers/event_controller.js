@@ -57,6 +57,11 @@ exports.getEvent = (req, res, next) => {
                     creating_time: result[0].creating_time,
                     start_time: result[0].start_time,
                     end_time: result[0].end_time,
+                    gender: result[0].gender,
+                    imageUrl: result[0].imageUrl,
+                    price: result[0].price,
+                    hosts: result[0].hosts,
+
                     location: {
                         lattiude: result[0].lattiude,
                         longitude: result[0].longitude,
@@ -66,7 +71,9 @@ exports.getEvent = (req, res, next) => {
                         name: result[1].name,
                         description: result[1].description,
                         title: result[1].title,
-                        category: result[1].category
+                        category: result[1].category,
+                        max_participants: result[1].max_participants,
+                        hosts: result[1].hosts
                     },
                     group: {
                         users: result[2].users
