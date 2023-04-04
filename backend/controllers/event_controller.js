@@ -33,7 +33,6 @@ exports.getEvent = (req, res, next) => {
     let eventLocation;
     let eventDetail;
     let eventGroup;
-    let eventUser;
 
     Event.findByPk(eventId)
         .then(event => {
@@ -45,8 +44,7 @@ exports.getEvent = (req, res, next) => {
             eventLocation = Location.findByPk(event.location_id);
             eventDetail = Detail.findByPk(event.detail_id);
             eventGroup = Group.findByPk(event.group_id);
-            eventUser = User.findByPk(event.user_id);
-            return Promise.all([eventLocation, eventDetail, eventGroup, eventUser]);
+            return Promise.all([event, eventLocation, eventDetail, eventGroup]);
 
         })
         .then(result => {
@@ -61,24 +59,15 @@ exports.getEvent = (req, res, next) => {
                     imageUrl: result[0].imageUrl,
                     price: result[0].price,
                     hosts: result[0].hosts,
-
-                    location: {
-                        lattiude: result[0].lattiude,
-                        longitude: result[0].longitude,
-                        user: result[3]
-                    },
-                    detail: {
-                        name: result[1].name,
-                        description: result[1].description,
-                        title: result[1].title,
-                        category: result[1].category,
-                        max_participants: result[1].max_participants,
-                        hosts: result[1].hosts
-                    },
-                    group: {
-                        users: result[2].users
-                    },
-                    user: result[3]
+                    max_participants: result[0].max_participants,
+                    current_participants: result[0].current_participants,
+                    hosts: result[0].hosts,
+                    lattiude: result[1].lattiude,
+                    longitude: result[1].longitude,
+                    title: result[2].title,
+                    description: result[2].description,
+                    category: result[2].category,
+                    users: result[3].users,
                 }
             });
         })
