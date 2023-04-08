@@ -9,26 +9,6 @@ const Address = sequelize.define("address", {
         autoIncrement: true,
         allowNull: false,
     },
-    country: {
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
-    city: {
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
-    state: {
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
-    street: {
-        type: Sequelize.STRING,
-        allowNull: false,
-    },
-    postcode: {
-        type: Sequelize.STRING,
-        allowNull: true,
-    },
     event_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -37,7 +17,33 @@ const Address = sequelize.define("address", {
             model: Event,
             key: 'id'
         }
-    }
+    },
+    country: {
+        type: Sequelize.STRING,
+        allowNull: false,
+    },
+    forDirection : {
+        type: Sequelize.STRING,
+        allowNull: true,
+    },
+    locationName: {
+        type: Sequelize.STRING,
+        allowNull: true,
+    },
+    province: {
+        type: Sequelize.STRING,
+        allowNull: true,
+    },
+    district  : {
+        type: Sequelize.STRING,
+        allowNull: true,
+    }, 
+       subLocality: {
+        type: Sequelize.STRING,
+        allowNull: true,
+    },
+
+
     
 });
 
