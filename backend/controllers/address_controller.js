@@ -1,4 +1,5 @@
 const Address = require('../models/address');
+const Event = require('../models/event');
 const Sequelize = require('sequelize');
 
 exports.createAddress = (req, res, next) => {
@@ -54,9 +55,28 @@ exports.createAddress = (req, res, next) => {
             next(err);
         });
 }
+
+exports.getAddressByEventId = (req, res, next) => {
+    const eventId = req.params.eventId;
+    Address.findOne({ where: { event_id: eventId } }).then(result => {
+        if (!result) {
+            const error = new Error('Could not find address.');
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({ message: 'Fetched events.', address: result });
+    })
+    .catch(err => {
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    });
+}
+
 exports.getAddress = (req, res, next) => {
-    const addressId = req.params.id;
-    Group.findByPk(addressId)
+    const addressId = req.params.addressId;
+    Address.findByPk(addressId)
         .then(address => {
             if (!address) {
                 const error = new Error('Could not find address.');
