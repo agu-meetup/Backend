@@ -113,8 +113,6 @@ exports.createEvent = (req, res, next) => {
 
     }
 
-
-
     Location.create({
         lattiude: lattiude,
         longitude: longitude,
@@ -825,6 +823,68 @@ exports.joinEvent = (req, res, next) => {
         );
 
 }
+
+exports.leaveEvent = (req, res, next) => {
+    const eventId = req.params.eventId;
+    const userId = req.body.userId;
+
+    if (!eventId) {
+        const error = new Error('Could not find event.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+    if (!userId) {
+        const error = new Error('Could not find user.');
+        error.statusCode = 404;
+        throw error;
+    }
+
+
+    Event.findByPk(eventId)
+        .then(event => {
+            if (!event) {
+                const error = new Error('Could not find event.');
+                error.statusCode = 404;
+                throw error;
+            }
+            event.current_participants--;
+            event.save();
+            return Group.findByPk(event.group_id);
+        }
+        )
+        .then(group => {
+            if (group.users.length > 0) {
+                group.users = group.users.replace("-" + userId, "");
+            }
+            else {
+                group.users = "";
+            }
+            return group.save();
+        }
+        )
+        .then(result => {
+            res.status(200).json({ message: 'User left event!', event: result });
+        }
+        ).then(result => {
+            User_Event.destroy({
+                where: {
+                    user_id: userId,
+                    event_id: eventId
+                }
+            })
+        }
+        )
+        .catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        }
+        );
+
+}
+
 
 exports.getUserEventsByUserId = (req, res, next) => {
     const userId = req.params.userId;
