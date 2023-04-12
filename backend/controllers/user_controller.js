@@ -27,6 +27,25 @@ exports.getUser = async (req, res) => {
       }
 };
 
+exports.getUserById = (req, res) => {
+  const userId = req.params.userId;
+  User.findByPk(userId)
+  .then(user => {
+    if (!user) {
+      const error = new Error('Could not find user.');
+      error.statusCode = 404;
+      throw error;
+    }
+    else {
+      res.status(200).json({
+        message: 'Fetched user successfully.',
+        user: user
+    });
+    }
+  })
+  .catch();
+}
+
 exports.updateUser = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   const name = req.body.name;

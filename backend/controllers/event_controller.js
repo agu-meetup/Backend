@@ -52,6 +52,7 @@ exports.getEvent = (req, res, next) => {
                 message: 'Event fetched.',
                 event: {
                     id: eventId,
+                    user_id: result[0].user_id,
                     creating_time: result[0].creating_time,
                     start_time: result[0].start_time,
                     end_time: result[0].end_time,
