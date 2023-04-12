@@ -701,9 +701,6 @@ exports.updateImgUrl =  (req, res, next) => {
 
 exports.deleteEvent = (req, res, next) => {
     const eventId = req.params.eventId;
-    let detailId;
-    let locationId;
-    let groupId;
 
     //null check
 
@@ -714,13 +711,6 @@ exports.deleteEvent = (req, res, next) => {
 
     }
 
-    if (!detailId && !locationId && !groupId) {
-        const error = new Error('No event to delete');
-        error.statusCode = 404;
-        return next(error);
-    }
-
-
     Event.findByPk(eventId)
         .then(async event => {
             if (!event) {
@@ -728,12 +718,9 @@ exports.deleteEvent = (req, res, next) => {
                 error.statusCode = 404;
                 throw error;
             }
-            detailId = event.detail_id;
-            locationId = event.location_id;
-            groupId = event.group_id;
-            Detail.destroy({ where: { id: detailId } });
-            Location.destroy({ where: { id: locationId } });
-            Group.destroy({ where: { id: groupId } })
+            Detail.destroy({ where: { id: event.detail_id } });
+            Location.destroy({ where: { id: event.location_id } });
+            Group.destroy({ where: { id: event.group_id } })
             return event.destroy();
         }
         )
