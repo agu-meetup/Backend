@@ -3,7 +3,6 @@
 
 const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
-const User = require('./user');
 const Location = sequelize.define("locations", {
     id: {
         primaryKey: true,

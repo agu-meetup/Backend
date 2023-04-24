@@ -15,15 +15,6 @@ const Event = sequelize.define("events", {
         autoIncrement: true,
         allowNull: false,
     },
-    detail_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        foreignKey: true,
-        references: {
-            model: Detail,
-            key: 'id'
-        }
-    },
     creating_time: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -35,15 +26,6 @@ const Event = sequelize.define("events", {
     end_time: {
         type: Sequelize.DATE,
         allowNull: false,
-    },
-    user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        foreignKey: true,
-        references: {
-            model: User,
-            key: 'id'
-        }
     },
     current_participants: {
         type: Sequelize.INTEGER,
