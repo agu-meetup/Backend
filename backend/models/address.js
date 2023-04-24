@@ -9,15 +9,6 @@ const Address = sequelize.define("address", {
         autoIncrement: true,
         allowNull: false,
     },
-    event_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        foreignKey: true,
-        references: {
-            model: Event,
-            key: 'id'
-        }
-    },
     country: {
         type: Sequelize.STRING,
         allowNull: false,

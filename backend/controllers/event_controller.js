@@ -722,6 +722,8 @@ exports.deleteEvent = (req, res, next) => {
             Detail.destroy({ where: { id: event.detail_id } });
             Location.destroy({ where: { id: event.location_id } });
             Group.destroy({ where: { id: event.group_id } })
+            Saved_Events.destroy({ where: { event_id: eventId } });
+            User_Event.destroy({ where: { event_id: eventId } });
             return event.destroy();
         }
         )

@@ -1,6 +1,5 @@
 const Address = require('../models/address');
 const Event = require('../models/event');
-const Sequelize = require('sequelize');
 
 exports.createAddress = (req, res, next) => {
     const country = req.body.country;

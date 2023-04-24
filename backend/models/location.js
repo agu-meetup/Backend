@@ -18,15 +18,6 @@ const Location = sequelize.define("locations", {
     longitude: {
         type: Sequelize.DOUBLE,
         allowNull: false,
-    },
-    user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        foreignKey: true,
-        references: {
-            model: User,
-            key: 'id'
-        }
     }
 });
 

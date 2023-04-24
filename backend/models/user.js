@@ -29,18 +29,9 @@ const User = sequelize.define("users", {
     type: Sequelize.STRING,
     allowNull: false,
   },
-
   gender: {
     type: Sequelize.STRING,
     allowNull: false,
-  },
-  forgot_password_id: {
-    type: Sequelize.INTEGER,
-    allowNull: true,
-    references: {
-      model: ForgotPassword,
-      key: 'id'
-    },
   },
   created_date: {
     type: Sequelize.DATE,

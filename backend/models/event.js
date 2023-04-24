@@ -45,24 +45,6 @@ const Event = sequelize.define("events", {
             key: 'id'
         }
     },
-    group_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        foreignKey: true,
-        references: {
-            model: Group,
-            key: 'id'
-        }
-    },
-    location_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        foreignKey: true,
-        references: {
-            model: Location,
-            key: 'id'
-        }
-    },
     current_participants: {
         type: Sequelize.INTEGER,
         allowNull: false,

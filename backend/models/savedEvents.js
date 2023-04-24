@@ -12,26 +12,7 @@ const Saved_Events = sequelize.define("savedEvents", {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         allowNull: false,
-    },
-    user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        foreignKey: true,
-        references: {
-            model: User,
-            key: 'id'
-        }
-    },
-    event_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        foreignKey: true,
-        references: {
-            model: Event,
-            key: 'id'
-        }
-    },
-
+    }
 });
 
 Saved_Events.hasMany(User, {foreignKey: 'id'});
