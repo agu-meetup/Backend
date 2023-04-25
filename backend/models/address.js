@@ -33,11 +33,7 @@ const Address = sequelize.define("address", {
         type: Sequelize.STRING,
         allowNull: true,
     },
-
-
     
 });
 
 module.exports = Address;
-
-Address.hasOne(Event, {foreignKey: 'event_id'});

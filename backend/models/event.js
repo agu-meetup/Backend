@@ -7,6 +7,7 @@ const Detail = require('./detail');
 const Group = require('./group');
 const User = require('./user');
 const Location = require('./location');
+const Address = require('./address');
 
 const Event = sequelize.define("events", {
     id: {
@@ -64,7 +65,8 @@ Group.hasMany(Event, {foreignKey: 'group_id'});
 Event.belongsTo(Group, {foreignKey: 'group_id'});
 Location.hasMany(Event, {foreignKey: 'location_id'});
 Event.belongsTo(Location, {foreignKey: 'location_id'});
-
+Address.belongsTo(Event, {foreignKey: 'event_id'});
+Event.hasOne(Address, {foreignKey: 'event_id'});
 module.exports = Event;
 
 
