@@ -15,8 +15,8 @@ const Saved_Events = sequelize.define("savedEvents", {
     }
 });
 
-Saved_Events.hasMany(User, {foreignKey: 'id'});
-Saved_Events.hasMany(Event, {foreignKey: 'id'});
+User.hasMany(Saved_Events, {foreignKey: 'user_id'});
+Event.hasMany(Saved_Events, {foreignKey: 'event_id'});
 
 
 module.exports = Saved_Events;
