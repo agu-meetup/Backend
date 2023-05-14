@@ -10,21 +10,18 @@ const ForgotPassword = sequelize.define("forgot_password", {
     allowNull: false,
   },
 
-  email: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  createdAt: {
+  expiredDate: {
     type: Sequelize.DATE,
     defaultValue: Sequelize.NOW,
     expires: 3600 
   },
   recoveryCode: {
-    type: Sequelize.STRING,
+    type: Sequelize.INTEGER,
     allowNull: true,
   },
 });
 
-
+User.hasMany(ForgotPassword, {foreignKey: 'user_id'});
+ForgotPassword.belongsTo(User, {foreignKey: 'user_id'});
 
 module.exports = ForgotPassword;

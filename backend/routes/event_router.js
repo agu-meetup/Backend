@@ -18,6 +18,7 @@ router.put('/event/:eventId/image', eventController.updateImgUrl);
 
 router.delete('/event/:eventId', eventController.deleteEvent);
 router.delete('/event/saveevent/:userId', eventController.deleteSavedEventByUserId);
+router.delete('/event/leaveevent/:eventId', eventController.leaveEvent);
 router.get('/event/user/:userId', eventController.getEventsByUser);
 router.get('/event/category/:category', eventController.getEventsByCategory);
 router.get('/event/parameter/:parameter', eventController.getEventsByParameter);

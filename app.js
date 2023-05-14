@@ -39,7 +39,7 @@ app.use("/api/auth", authRouter);
 app.use("/api", eventRouter);
 app.use("/api", detailRouter);
 app.use("/api", groupRouter);
-app.use("/api/password", passwordRouter);
+app.use("/api", passwordRouter);
 app.use("/api/address",addressRouter);
 app.use("/api",userRouter);
 

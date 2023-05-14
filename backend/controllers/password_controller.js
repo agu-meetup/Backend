@@ -4,6 +4,8 @@ const crypto = require('crypto');
 
 const ForgotPasswordModel = require('../models/forgot_password');
 const User = require('../models/user');
+const { where } = require('sequelize');
+const ForgotPassword = require('../models/forgot_password');
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -15,7 +17,7 @@ const transporter = nodemailer.createTransport({
 
 const generateCode = () => {
   const code = Math.floor(1000 + Math.random() * 9000);
-  return code.toString();
+  return code;
 };
 
 const sendCodeEmail = async (email, code) => {
@@ -100,4 +102,35 @@ const resetPassword = async (req, res) => {
   }
 };
 
-module.exports = { forgotPassword, resetPassword };
+const codeSender = async(req, res) => {
+  userEmail = req.body.email;
+
+  const user = await User.findOne({ where: {email: userEmail}});
+
+  if(!user){
+    return res.status(400).json({ message: 'User not found' });
+  }
+
+  const code = generateCode();
+
+  await sendCodeEmail(email, code.toString());
+  
+  ForgotPassword.create({
+    userId: user.id,
+    recoveryCode: code,
+  }).then((result) => {
+    res.status(200).json({
+        message:"Forgot password has been added succesfully",
+        result
+       
+    })
+}).catch((err) => {
+    res.status(400).json({
+        message:"Forgot password has not been added",
+        err
+       
+    })
+});
+}
+
+module.exports = { forgotPassword, resetPassword, codeSender };
