@@ -5,7 +5,8 @@ const passwordController=require('../controllers/password_controller');
 
 
 // router.post('/user/forgot', passwordController.forgotPassword);
-// router.post('/user/reset', passwordController.resetPassword);
 router.post('/password/codeSender', passwordController.codeSender);
+router.post('/password/verifyCode', passwordController.verifyCode);
+router.post('/password/reset', passwordController.resetPassword);
 
 module.exports = router;
