@@ -983,5 +983,77 @@ exports.deleteSavedEventByUserId = (req, res, next) => {
             next(err);
         }
         );
+    }
 
-}
+    getAllInfoEvents = async (events) =>  {
+        var detailedEvents = [];
+        for (const event of events){
+            const eventAddress = await Address.findOne({where: {event_id: event.id}});
+            const eventDetail = await Detail.findByPk(event.detail_id);
+            const eventUser = await User.findByPk(event.user_id);
+            const eventLocation = await Location.findByPk(event.location_id);
+
+            detailedEvents.push({
+                id: event.id,
+                start_time: event.start_time,
+                end_time: event.end_time,
+                current_participants: event.current_participants,
+                max_participants: event.max_participants,
+                hosts: event.hosts,
+                gender: event.gender,
+                imageUrl: event.imageUrl,
+                price: event.price,
+                eventDetail: {
+                    id: eventDetail.id,
+                    title: eventDetail.title,
+                    description: eventDetail.description,
+                    category: eventDetail.category,
+                },
+                eventUser: {
+                    id: eventUser.id,
+                    name: eventUser.name,
+                    surname: eventUser.surname,
+                    email: eventUser.email,
+                    gender: eventUser.gender,
+                    phone_number: eventUser.phone_number,
+                },
+                eventLocation: {
+                    id: eventLocation.id,
+                    lattiude: eventLocation.lattiude,
+                    longitude: eventLocation.longitude,
+                },
+                eventAddress: {
+                    id: eventAddress.id,
+                    country: eventAddress.country,
+                    forDirection: eventAddress.forDirection,
+                    locationName: eventAddress.locationName,
+                    province: eventAddress.province,
+                    district: eventAddress.district,
+                    subLocality: eventAddress.subLocality,
+                }
+            });
+        }
+        return detailedEvents;
+    }
+
+    exports.getMyEventsByUserId = async (req, res, next) => {
+        const userId = req.params.userId;
+
+        const myEvents = await Event.findAll({where: {user_id: userId}});
+        var detailedMyEvents = await getAllInfoEvents(myEvents);
+
+
+        res.status(200).json({ message: 'My Events list', detailedMyEvents });
+    }
+    
+    exports.getJoinedEventsByUserId = async (req, res, next) => {
+        const userId = req.params.userId;
+
+        const userEvents = await User_Event.findAll({where: {user_id: userId}});
+        const userEventsEventIds = userEvents.map(x => x.event_id);
+
+        const joinedEvents = await Event.findAll({where: {id: userEventsEventIds}});
+        var detailedJoinedEvents = await getAllInfoEvents(joinedEvents);
+
+        res.status(200).json({ message: 'My Events list', detailedJoinedEvents });
+    }

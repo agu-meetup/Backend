@@ -28,6 +28,9 @@ router.get('/event/UserEvents/:userId', eventController.getUserEventsByUserId);
 
 router.post('/event/:eventId/user/:userId', eventController.joinEvent);
 
+router.get('/event/myEvent/:userId', eventController.getMyEventsByUserId);
+router.get('/event/joinedEvent/:userId', eventController.getJoinedEventsByUserId);
+
 
 
 module.exports = router;
