@@ -7,6 +7,6 @@ const router=express.Router();
 router.get('/fetchAddress/:addressId',addressController.getAddress);
 router.get('/fetchAddressByEventId/:eventId',addressController.getAddressByEventId);
 router.post('/createAddress',addressController.createAddress);
-router.post('/updateAddress/:addressId',addressController.updateAddress);
+router.put('/updateAddress/:addressId',addressController.updateAddress);
 
 module.exports=router;

@@ -54,7 +54,51 @@ exports.createAddress = (req, res, next) => {
             next(err);
         });
 }
-
+exports.updateAddress = (req, res, next) => {
+    const country = req.body.country;
+    const event_id = req.body.event_id;
+    const district = req.body.district;
+    const province = req.body.province;
+    const locationName = req.body.locationName;
+    const forDirection = req.body.forDirection;
+    const subLocality = req.body.subLocality;
+    const addressId = req.params.addressId;
+  
+    Address.findByPk(addressId)
+      .then((address) => {
+        if (!address) {
+          return res.status(404).json({ message: 'Address not found' });
+        }
+  
+        address.country = country;
+        address.event_id = event_id;
+        address.district = district;
+        address.province = province;
+        address.locationName = locationName;
+        address.forDirection = forDirection;
+        address.subLocality = subLocality;
+  
+        return address.save();
+      })
+      .then((updatedAddress) => {
+        if (updatedAddress) {
+          res.status(200).json({
+            message: 'Address has been updated',
+            result: updatedAddress,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+      });
+  };
+  
+           
+        
+      
+  
+  
 exports.getAddressByEventId = (req, res, next) => {
     const eventId = req.params.eventId;
     Address.findOne({ where: { event_id: eventId } }).then(result => {
@@ -91,38 +135,6 @@ exports.getAddress = (req, res, next) => {
             next(err);
         });
 }
-exports.updateAddress = (req, res, next) => {
-    try{
 
-      const country = req.body.country;
-      const city= req.body.city;
-      const state = req.body.state;
-      const street = req.body.street;
-      const postcode = req.body.postcode;
-   
-  
-      const address =  Address.findByPk(req.params.id);
-      address.country = country;
-      address.city = city;
-      address.state = state;
-      address.street = street;
-      address.postcode = postcode;
-      
-  
-       address.save();
-  
-      res.status(200).json({
-        message:"Address has been updated",
-        result
-      });
-  
-    }catch(error){
-       res.status(401).json({
-         message:"Address has not been updated",
-         error
-      });
-      console.log(error);
-    }
-  }
 
   
