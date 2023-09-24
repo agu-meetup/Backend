@@ -25,6 +25,7 @@ router.get('/event/parameter/:parameter', eventController.getEventsByParameter);
 router.get('/event/group/:groupId', eventController.getEventsByGroup);
 router.get('/event/categories/:categories', eventController.getEventsByCategories);
 router.get('/event/UserEvents/:userId', eventController.getUserEventsByUserId);
+router.post('/event/locations', eventController.getEventsByLocation);
 
 router.post('/event/:eventId/user/:userId', eventController.joinEvent);
 

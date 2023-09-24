@@ -327,9 +327,9 @@ exports.getEventsByGroup = (req, res, next) => {
 }
 
 exports.getEventsByLocation = (req, res, next) => {
-    const lattiude = req.params.lattiude;
-    const longitude = req.params.longitude;
-
+    const lattiude = req.body.lattiude;
+    const longitude = req.body.longitude;
+    const radius = req.body.radius?? 2;
     // null check
     if (!lattiude || !longitude) {
         const error = new Error('Lattiude or longitude are null');
@@ -343,8 +343,12 @@ exports.getEventsByLocation = (req, res, next) => {
             {
                 model: Location,
                 where: {
-                    lattiude: lattiude,
-                    longitude: longitude
+                    lattiude: {
+                        [Op.between]: [lattiude - radius, lattiude + radius]
+                    },
+                    longitude: {
+                        [Op.between]: [longitude - radius, longitude + radius]
+                    }
 
                 }
             }
