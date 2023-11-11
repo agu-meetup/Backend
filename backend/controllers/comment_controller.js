@@ -58,7 +58,7 @@ exports.createComment = (req, res, next) => {
 }
 
 exports.getComment = async (req, res, next) => {
-    const event_id = req.body.event_id;
+    const event_id = req.params.eventId;
 
     try {
         const comments = await Comment.findAll({

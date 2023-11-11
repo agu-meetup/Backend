@@ -5,7 +5,7 @@ const router=express.Router();
 
 
 router.post('/createComment',comment_controller.createComment);
-router.get('/getcomments',comment_controller.getComment);
+router.get('/getcomments/:eventId',comment_controller.getComment);
 
 
 module.exports=router;
