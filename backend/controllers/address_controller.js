@@ -1,6 +1,10 @@
 const Address = require('../models/address');
 const Event = require('../models/event');
-
+const Location = require('../models/location');
+const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
+const { QueryTypes } = require('sequelize');
+const sequelize = require('../util/database');
 exports.createAddress = (req, res, next) => {
     const country = req.body.country;
     const event_id = req.body.event_id;
@@ -10,14 +14,13 @@ exports.createAddress = (req, res, next) => {
     const forDirection = req.body.forDirection;
     const subLocality = req.body.subLocality;
 
-    if(!country || !event_id || !district || !province || !locationName || !subLocality)
-    {
+    if (!country || !event_id || !district || !province || !locationName || !subLocality) {
         const error = new Error('All fields are required');
         error.statusCode = 404;
         throw error;
     }
-    
-    if(event_id == null){
+
+    if (event_id == null) {
         const error = new Error('Event id is required');
         error.statusCode = 404;
         throw error;
@@ -30,7 +33,7 @@ exports.createAddress = (req, res, next) => {
         }
     });
 
-    
+
     Address.create({
         country: country,
         event_id: event_id,
@@ -54,7 +57,51 @@ exports.createAddress = (req, res, next) => {
             next(err);
         });
 }
-
+exports.updateAddress = (req, res, next) => {
+    const country = req.body.country;
+    const event_id = req.body.event_id;
+    const district = req.body.district;
+    const province = req.body.province;
+    const locationName = req.body.locationName;
+    const forDirection = req.body.forDirection;
+    const subLocality = req.body.subLocality;
+    const addressId = req.params.addressId;
+  
+    Address.findByPk(addressId)
+      .then((address) => {
+        if (!address) {
+          return res.status(404).json({ message: 'Address not found' });
+        }
+  
+        address.country = country;
+        address.event_id = event_id;
+        address.district = district;
+        address.province = province;
+        address.locationName = locationName;
+        address.forDirection = forDirection;
+        address.subLocality = subLocality;
+  
+        return address.save();
+      })
+      .then((updatedAddress) => {
+        if (updatedAddress) {
+          res.status(200).json({
+            message: 'Address has been updated',
+            result: updatedAddress,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+      });
+  };
+  
+           
+        
+      
+  
+  
 exports.getAddressByEventId = (req, res, next) => {
     const eventId = req.params.eventId;
     Address.findOne({ where: { event_id: eventId } }).then(result => {
@@ -65,12 +112,12 @@ exports.getAddressByEventId = (req, res, next) => {
         }
         res.status(200).json({ message: 'Fetched events.', address: result });
     })
-    .catch(err => {
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
-    });
+        .catch(err => {
+            if (!err.statusCode) {
+                err.statusCode = 500;
+            }
+            next(err);
+        });
 }
 
 exports.getAddress = (req, res, next) => {
@@ -91,38 +138,33 @@ exports.getAddress = (req, res, next) => {
             next(err);
         });
 }
-exports.updateAddress = (req, res, next) => {
-    try{
 
-      const country = req.body.country;
-      const city= req.body.city;
-      const state = req.body.state;
-      const street = req.body.street;
-      const postcode = req.body.postcode;
-   
-  
-      const address =  Address.findByPk(req.params.id);
-      address.country = country;
-      address.city = city;
-      address.state = state;
-      address.street = street;
-      address.postcode = postcode;
-      
-  
-       address.save();
-  
-      res.status(200).json({
-        message:"Address has been updated",
-        result
-      });
-  
-    }catch(error){
-       res.status(401).json({
-         message:"Address has not been updated",
-         error
-      });
-      console.log(error);
+exports.findClosestCitiesAndStreets = async (req, res, next) => {
+        const lattiude = req.body.lattiude;
+        const longitude = req.body.longitude;
+        const radius = req.body.radius?? 2;
+        const limit = req.body.limit?? 5;
+        // find 5 events id that are closest to the user
+        let events = [];
+
+        const locations = await sequelize.query(
+            `SELECT id, lattiude, longitude
+              FROM locations where lattiude between ${lattiude-radius} and ${lattiude+ radius} and ${longitude-radius} and ${longitude+ radius} LIMIT ${limit}`,
+            { type: QueryTypes.SELECT }
+        );
+
+        for (let i = 0; i < locations.length; i++) {
+            const location = locations[i];
+            const locationId = location.id;
+            const event = await Event.findOne({ where: { location_id: locationId } });
+            events.push(event);
+        }
+        
+        const result = await sequelize.query(
+            `SELECT DISTINCT province, district FROM addresses WHERE event_id IN (${events.map(event => event.id)})`,
+            { type: QueryTypes.SELECT }
+        );
+        
+        return res.status(200).json({ message: 'Fetched locations.', result: result });
+ 
     }
-  }
-
-  
