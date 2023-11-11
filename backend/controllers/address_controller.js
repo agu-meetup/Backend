@@ -142,29 +142,83 @@ exports.getAddress = (req, res, next) => {
 exports.findClosestCitiesAndStreets = async (req, res, next) => {
         const lattiude = req.body.lattiude;
         const longitude = req.body.longitude;
-        const radius = req.body.radius?? 2;
         const limit = req.body.limit?? 5;
-        // find 5 events id that are closest to the user
-        let events = [];
 
-        const locations = await sequelize.query(
-            `SELECT id, lattiude, longitude
-              FROM locations where lattiude between ${lattiude-radius} and ${lattiude+ radius} and ${longitude-radius} and ${longitude+ radius} LIMIT ${limit}`,
-            { type: QueryTypes.SELECT }
-        );
+        const events = await Event.findAll({
+            include: [
+            {
+                model: Location 
+            },
+            {
+                model: Address
+            }
+        ]});
 
-        for (let i = 0; i < locations.length; i++) {
-            const location = locations[i];
-            const locationId = location.id;
-            const event = await Event.findOne({ where: { location_id: locationId } });
-            events.push(event);
+        console.log("before loop");
+        events.forEach(event => {
+            console.log("in loop");
+            const difference = Math.sqrt(Math.pow(event.location.lattiude - lattiude, 2) + Math.pow(event.location.longitude - longitude, 2));
+            event.distanceDifference = difference;
+            console.log(difference);
+        });
+
+        console.log("after loop");
+
+        events.sort((a, b) => {
+            return a.dataValues.distanceDifference - b.dataValues.distanceDifference;
+        });
+
+        sortedEventsCities = events.map((x) => ({'province': x.address.province, 'district': x.address.district}));
+        
+
+        let counter = 0;
+        const result = [];
+
+        for(let i = 0; i < sortedEventsCities.length; i++){
+            if (!result.includes(sortedEventsCities[i].district)){
+                if(!result.includes(sortedEventsCities[i].province)){
+                    result.push(sortedEventsCities[i].province);
+                    counter++;
+                }
+                result.push(sortedEventsCities[i].district);
+                counter++;
+            }
+            if (counter > limit) {
+                break;
+            }
         }
+
+
+        // locations.forEach(location => {
+        //     const difference = Math.sqrt(Math.pow(location.lattiude - lattiude, 2) - Math.pow(location.longitude - longitude, 2));
+            
+        // });
+
+        // find 5 events id that are closest to the user
+        // let events = [];
+
+        // const locations = await sequelize.query(
+        //     `SELECT id, lattiude, longitude
+        //       FROM locations where lattiude between ${lattiude-radius} and ${lattiude+ radius} and ${longitude-radius} and ${longitude+ radius} LIMIT ${limit}`,
+        //     { type: QueryTypes.SELECT }
+        // );
+
+        // for (let i = 0; i < locations.length; i++) {
+        //     const location = locations[i];
+        //     const locationId = location.id;
+        //     const event = await Event.findOne({ where: { location_id: locationId } });
+        //     events.push(event);
+        // }
+
+        // if (events.length == 0) {
+        //     return res.status(400).json({message: 'There is no event address for fetching'})
+        // }
         
-        const result = await sequelize.query(
-            `SELECT DISTINCT province, district FROM addresses WHERE event_id IN (${events.map(event => event.id)})`,
-            { type: QueryTypes.SELECT }
-        );
+        // const result = await sequelize.query(
+        //     `SELECT DISTINCT province, district FROM addresses WHERE event_id IN (${events.map(event => event.id)})`,
+        //     { type: QueryTypes.SELECT }
+        // );
         
-        return res.status(200).json({ message: 'Fetched locations.', result: result });
+        // return res.status(200).json({ message: 'Fetched locations.', result: result });
  
     }
