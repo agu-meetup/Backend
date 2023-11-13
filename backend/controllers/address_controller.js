@@ -140,9 +140,9 @@ exports.getAddress = (req, res, next) => {
 }
 
 exports.findClosestCitiesAndStreets = async (req, res, next) => {
-        const lattiude = req.body.lattiude;
-        const longitude = req.body.longitude;
-        const limit = req.body.limit?? 5;
+        const lattiude = req.query.lattiude;
+        const longitude = req.query.longitude;
+        const limit = req.query.limit?? 5;
 
         const events = await Event.findAll({
             include: [
@@ -165,7 +165,7 @@ exports.findClosestCitiesAndStreets = async (req, res, next) => {
         console.log("after loop");
 
         events.sort((a, b) => {
-            return a.dataValues.distanceDifference - b.dataValues.distanceDifference;
+            return a.distanceDifference - b.distanceDifference;
         });
 
         sortedEventsCities = events.map((x) => ({'province': x.address.province, 'district': x.address.district}));
@@ -188,37 +188,5 @@ exports.findClosestCitiesAndStreets = async (req, res, next) => {
             }
         }
 
-
-        // locations.forEach(location => {
-        //     const difference = Math.sqrt(Math.pow(location.lattiude - lattiude, 2) - Math.pow(location.longitude - longitude, 2));
-            
-        // });
-
-        // find 5 events id that are closest to the user
-        // let events = [];
-
-        // const locations = await sequelize.query(
-        //     `SELECT id, lattiude, longitude
-        //       FROM locations where lattiude between ${lattiude-radius} and ${lattiude+ radius} and ${longitude-radius} and ${longitude+ radius} LIMIT ${limit}`,
-        //     { type: QueryTypes.SELECT }
-        // );
-
-        // for (let i = 0; i < locations.length; i++) {
-        //     const location = locations[i];
-        //     const locationId = location.id;
-        //     const event = await Event.findOne({ where: { location_id: locationId } });
-        //     events.push(event);
-        // }
-
-        // if (events.length == 0) {
-        //     return res.status(400).json({message: 'There is no event address for fetching'})
-        // }
-        
-        // const result = await sequelize.query(
-        //     `SELECT DISTINCT province, district FROM addresses WHERE event_id IN (${events.map(event => event.id)})`,
-        //     { type: QueryTypes.SELECT }
-        // );
-        
-        // return res.status(200).json({ message: 'Fetched locations.', result: result });
- 
+        return res.status(200).json({message: 'Nearest location are fetched', locations: result});
     }
